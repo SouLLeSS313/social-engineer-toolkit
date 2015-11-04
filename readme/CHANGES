@@ -1,4 +1,77 @@
 ~~~~~~~~~~~~~~~~
+version 6.5.8
+~~~~~~~~~~~~~~~~
+
+* fixed an issue that would write out .setindex.html instead of copying to .set/index.html.
+* fixed an issue that would cause harvester log to not properly write out on certain systems.
+* fixed an issue that would cause the harvester log file to not write if path was /var/www/html
+* added to automatically check if Kali is in use - removes the old install and git clones in order to keep SET up to date
+* removed automatic SET update and put a warning that SET will be out of date using Kali-current vs bleeding edge
+
+~~~~~~~~~~~~~~~~
+version 6.5.7
+~~~~~~~~~~~~~~~~
+
+* fix chown issue on different platforms when using harvester (pull request)
+* fixed an issue when moving to /etc/setoolkit/set.config would throw exception when using teensy attack vectors, now fixed
+* fixed an issue which would cause msf.exe to not be found when using dll hijacking
+
+~~~~~~~~~~~~~~~~
+version 6.5.6
+~~~~~~~~~~~~~~~~
+
+* fixed solo payload generation where listener would not launch properly 
+
+~~~~~~~~~~~~~~~~
+version 6.5.5
+~~~~~~~~~~~~~~~~
+
+* fixed automatic payload creation on pdf template where on Kali it would hang on waiting for payload
+
+~~~~~~~~~~~~~~~~
+version 6.5.4
+~~~~~~~~~~~~~~~~
+
+* fixed pdf template creation when using file format attack vector on option number one - was due to msfcli being removed - converted over to msfconsole
+* fixed using infectious media generator using pdf template
+* added automatic detection of /var/www/html or /var/www
+* added automatic path selection when using config file
+
+~~~~~~~~~~~~~~~~
+version 6.5.3
+~~~~~~~~~~~~~~~~
+
+* added automatic path detection for metasploit in SET and PTF
+
+~~~~~~~~~~~~~~~~
+version 6.5.2
+~~~~~~~~~~~~~~~~
+
+* added smallest payload option for msfvenom shellcode creation
+* added automatic start of apache on hta attack
+* fixed powershell teensy deployment
+
+~~~~~~~~~~~~~~~~
+version 6.5.1
+~~~~~~~~~~~~~~~~
+
+* changed meta_path to pull blank path when using Kali linux
+* changed msfvenom and msfconsole launching
+* added better check for fasttrack
+
+~~~~~~~~~~~~~~~~
+version 6.5
+~~~~~~~~~~~~~~~~
+
+* added brand new attack vector HTA attack and incorporated powershell injection into it
+* fixed a prompt that would cause double IP questions in certain attack vectors
+* slimmed down powershell injection http/https attack vectors in order to use in payload delivery
+* added exploit to browser attack Adobe Flash Player ByteArray Use After Free (2015-07-06)
+* added exploit to browser attack Adobe Flash Player Nellymoser Audio Decoding Buffer Overflow (2015-06-23)
+* added exploit to browser attack Adobe Flash Player Drawing Fill Shader Memory Corruption (2015-05-12)
+
+
+~~~~~~~~~~~~~~~~
 version 6.4.1
 ~~~~~~~~~~~~~~~~
 

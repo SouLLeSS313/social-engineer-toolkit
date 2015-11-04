@@ -162,6 +162,19 @@ try:
                     return_continue()
                     break
 
+
+                ###############################################################
+                # HTA ATTACK VECTOR METHOD HERE
+                ###############################################################
+                if attack_vector == '8':
+                        from src.webattack.hta.main import *
+                        # update config
+                        update_options("ATTACK_VECTOR=HTA")
+                        gen_hta_cool_stuff()
+                        attack_vector = "hta"
+			print_status("Automatically starting Apache for you...")
+			subprocess.Popen("service apache2 start", shell=True).wait()
+
                 # Removed to delete MLITM
                 if attack_vector != "99999":
 
@@ -185,8 +198,9 @@ try:
 
                 try:
                     # write our attack vector to file to be called later
-                    os.chdir(definepath)
-                    filewrite = file(setdir + "/attack_vector","w")
+		    #print definepath()
+                    #os.chdir(definepath)
+                    filewrite = file(setdir + "/attack_vector", "w")
 
                     # webjacking and web templates are not allowed
                     if attack_vector == "5" and choice3 == "1":
@@ -276,43 +290,45 @@ try:
                                 if attack_vector != "harvester":
                                     if attack_vector != "tabnabbing":
                                         if attack_vector != "webjacking":
-                                            # this part is to determine if NAT/port forwarding is used
-                                            # if it is it'll prompt for additional questions
-                                            print_info("NAT/Port Forwarding can be used in the cases where your SET machine is")
-                                            print_info("not externally exposed and may be a different IP address than your reverse listener.")
-                                            nat_or_fwd = yesno_prompt('0', 'Are you using NAT/Port Forwarding [yes|no]')
-                                            if nat_or_fwd == "YES":
-                                                ipquestion = raw_input(setprompt(["2"], "IP address to SET web server (this could be your external IP or hostname)"))
-
-                                                filewrite2 = file(setdir + "/interface", "w")
-                                                filewrite2.write(ipquestion)
-                                                filewrite2.close()
-                                                # is your payload/listener on a different IP?
-                                                natquestion = yesno_prompt(["2"], "Is your payload handler (metasploit) on a different IP from your external NAT/Port FWD address [yes|no]")
-                                                if natquestion == 'YES':
-                                                    ipaddr = raw_input(setprompt(["2"], "IP address for the reverse handler (reverse payload)"))
-                                                if natquestion == "NO":
-                                                    ipaddr = ipquestion
-                                            # if you arent using NAT/Port FWD
-                                            if nat_or_fwd == "NO":
-                                                print_info("Enter the IP address of your interface IP or if your using an external IP, what")
-                                                print_info("will be used for the connection back and to house the web server (your interface address)")
-                                                ipaddr = raw_input(setprompt(["2"], "IP address or hostname for the reverse connection"))
-                                                # here we check if they are using a hostname else we loop through until they have a legit one
-                                                if validate_ip(ipaddr) == False:
-                                                    while 1:
-                                                        choice = raw_input(setprompt(["2"], "This is not an IP address. Are you using a hostname? [y/n] "))
-                                                        if choice == "" or choice.lower() == "y":
-                                                            print_status("Roger that. Using hostnames moving forward..")
-                                                            break
-                                                        else:
-                                                            ipaddr = raw_input(setprompt(["2"], "IP address for the reverse connection"))
-                                                            if validate_ip(ipaddr) == True: break
+					    if attack_vector != "hta":
+	                                            # this part is to determine if NAT/port forwarding is used
+	                                            # if it is it'll prompt for additional questions
+	                                            print_info("NAT/Port Forwarding can be used in the cases where your SET machine is")
+	                                            print_info("not externally exposed and may be a different IP address than your reverse listener.")
+	                                            nat_or_fwd = yesno_prompt('0', 'Are you using NAT/Port Forwarding [yes|no]')
+	                                            if nat_or_fwd == "YES":
+	                                                ipquestion = raw_input(setprompt(["2"], "IP address to SET web server (this could be your external IP or hostname)"))
+	
+	                                                filewrite2 = file(setdir + "/interface", "w")
+	                                                filewrite2.write(ipquestion)
+	                                                filewrite2.close()
+	                                                # is your payload/listener on a different IP?
+	                                                natquestion = yesno_prompt(["2"], "Is your payload handler (metasploit) on a different IP from your external NAT/Port FWD address [yes|no]")
+	                                                if natquestion == 'YES':
+	                                                    ipaddr = raw_input(setprompt(["2"], "IP address for the reverse handler (reverse payload)"))
+	                                                if natquestion == "NO":
+	                                                    ipaddr = ipquestion
+	                                            # if you arent using NAT/Port FWD
+	                                            if nat_or_fwd == "NO":
+	                                                print_info("Enter the IP address of your interface IP or if your using an external IP, what")
+	                                                print_info("will be used for the connection back and to house the web server (your interface address)")
+	                                                ipaddr = raw_input(setprompt(["2"], "IP address or hostname for the reverse connection"))
+	                                                # here we check if they are using a hostname else we loop through until they have a legit one
+	                                                if validate_ip(ipaddr) == False:
+	                                                    while 1:
+	                                                        choice = raw_input(setprompt(["2"], "This is not an IP address. Are you using a hostname? [y/n] "))
+	                                                        if choice == "" or choice.lower() == "y":
+	                                                            print_status("Roger that. Using hostnames moving forward..")
+	                                                            break
+	                                                        else:
+	                                                            ipaddr = raw_input(setprompt(["2"], "IP address for the reverse connection"))
+	                                                            if validate_ip(ipaddr) == True: break
 
                                 if attack_vector == "harvester" or attack_vector == "tabnabbing" or attack_vector == "webjacking":
                                     print_info("This option is used for what IP the server will POST to.")
                                     print_info("If you're using an external IP, use your external IP for this")
                                     ipaddr = raw_input(setprompt(["2"], "IP address for the POST back in Harvester/Tabnabbing"))
+				if check_options("IPADDR=") != 0: ipaddr = check_options("IPADDR=")
                                 update_options("IPADDR=" + ipaddr)
 
                         # if java applet attack
@@ -397,9 +413,10 @@ try:
                                         if attack_vector != "webjacking":
                                             if attack_vector != "multiattack":
                                                 if attack_vector != "profiler":
-                                                    # spawn web server here
-                                                    debug_msg(me, "importing 'src.html.spawn'", 1)
-                                                    import src.html.spawn
+						    if attack_vector != "hta":
+	                                                    # spawn web server here
+	                                                    debug_msg(me, "importing 'src.html.spawn'", 1)
+	                                                    import src.html.spawn
 
 
                             # multi attack vector here
@@ -519,12 +536,13 @@ try:
                                 if attack_vector != "tabnabbing":
                                     if attack_vector != "multiattack":
                                         if attack_vector != "webjacking":
-                                            sys.path.append("src/html")
-                                            debug_msg(me, "importing 'src.html.spawn'", 1)
-                                            try:
-                                                reload(spawn)
-                                            except:
-                                                import spawn
+						if attack_vector != "hta":
+	                                            sys.path.append("src/html")
+	                                            debug_msg(me, "importing 'src.html.spawn'", 1)
+	                                            try:
+	                                                reload(spawn)
+	                                            except:
+	                                                import spawn
 
                     # Import your own site
                     if choice3 == '3':
@@ -736,7 +754,7 @@ try:
 
 	    # if we aren't exiting, then launch autorun
             if infectious_menu_choice != "99":
-		try: src.autorun.autolaunch
+		try: import src.autorun.autolaunch
 		except: reload(src.autorun.autolaunch)
 
 
@@ -747,8 +765,9 @@ try:
         #
         if main_menu_choice == '4':
 	    update_options("PAYLOADGEN=SOLO")
-	    try: import src.core.payloadgen.solo
-	    except: reload(src.core.payloadgen.solo)
+	    import src.core.payloadgen.solo
+	    #try: import src.core.payloadgen.solo
+	    #except: reload(src.core.payloadgen.solo)
             # if the set payload is there
             if os.path.isfile(setdir + "/msf.exe"):
                 shutil.copyfile(setdir + "/msf.exe", "payload.exe")

